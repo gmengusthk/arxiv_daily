@@ -205,11 +205,27 @@ def generate_report(analysis: Dict, research_topics: List[str], output_file: str
                     topic_papers[topic] = []
                 topic_papers[topic].append(paper)
         
+        # Add a section for papers that might have been missed
+        f.write("## Topic Distribution\n\n")
+        f.write("| Topic | Number of Papers |\n")
+        f.write("|-------|-----------------|\n")
+        for topic in research_topics:
+            count = len(topic_papers.get(topic, []))
+            # Create a URL-friendly anchor for the topic
+            anchor = topic.lower().replace(' ', '-')
+            f.write(f"| [{topic}](#{anchor}) | {count} |\n")
+        f.write("\n")
+        
+        # Add a note about papers that might be relevant to multiple topics
+        f.write("> Note: Papers may appear under multiple topics if they are relevant to more than one research area.\n\n")
+        
         # Write papers grouped by topics
         f.write("## Papers by Topic\n\n")
         for topic in research_topics:
             if topic in topic_papers:
-                f.write(f"### {topic}\n\n")
+                # Create a URL-friendly anchor for the topic
+                anchor = topic.lower().replace(' ', '-')
+                f.write(f"### <a id='{anchor}'></a>{topic}\n\n")
                 f.write(f"*Found {len(topic_papers[topic])} relevant papers*\n\n")
                 
                 for paper in topic_papers[topic]:
@@ -228,18 +244,6 @@ def generate_report(analysis: Dict, research_topics: List[str], output_file: str
                     f.write(f"- [arXiv Page]({paper['arxiv_url']})\n")
                     f.write(f"- [PDF]({paper['pdf_url']})\n\n")
                     f.write("---\n\n")
-        
-        # Add a section for papers that might have been missed
-        f.write("## Topic Distribution\n\n")
-        f.write("| Topic | Number of Papers |\n")
-        f.write("|-------|-----------------|\n")
-        for topic in research_topics:
-            count = len(topic_papers.get(topic, []))
-            f.write(f"| {topic} | {count} |\n")
-        f.write("\n")
-        
-        # Add a note about papers that might be relevant to multiple topics
-        f.write("> Note: Papers may appear under multiple topics if they are relevant to more than one research area.\n\n")
 
 def get_output_filename(base_dir: str = 'papers') -> str:
     """Generate output filename with current date."""
