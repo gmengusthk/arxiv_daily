@@ -4,9 +4,11 @@ This project automatically fetches and analyzes Computer Vision papers from arXi
 
 ## Features
 
-- Automatically fetches Computer Vision papers from arXiv
+- Automatically fetches Computer Vision papers from arXiv(modify the query="cat:cs.CV" in arxiv.Search for other categories)
 - Uses AI to analyze papers and identify relevant ones based on your research topics
-- Generates a detailed markdown report with analysis results
+- Groups papers by research topics for better organization
+- Provides detailed analysis of each paper's relevance to your research interests
+- Generates a comprehensive markdown report with topic distribution
 - Supports custom research topics and filtering
 - Progress tracking during analysis
 - Secure API key management
@@ -55,7 +57,11 @@ pip install -r requirements.txt
 
 1. First, fetch the papers:
 ```bash
+# Fetch papers from the last 3 days with default max results (1000)
 python arxiv_daily.py --days 3
+
+# Fetch papers with custom max results limit
+python arxiv_daily.py --days 3 --max-results 500
 ```
 This will create a file named `papers/cv_papers_YYYY-MM-DD_to_YYYY-MM-DD.md` containing the fetched papers.
 
@@ -73,6 +79,7 @@ This will automatically use the latest fetched papers and create a file named `p
 
 For `arxiv_daily.py`:
 - `--days`: Number of past days to fetch papers for (default: 3)
+- `--max-results`: Maximum number of papers to fetch from arXiv (default: 1000)
 
 For `analyze_papers.py`:
 - `--input`: Input markdown file with papers (default: latest arxiv daily output)
@@ -87,13 +94,19 @@ The scripts generate two types of markdown files:
    - Filename format: `papers/cv_papers_YYYY-MM-DD_to_YYYY-MM-DD.md`
    - Contains the list of papers with their details
    - Includes a daily summary of paper counts
+   - Shows the maximum number of results considered in the search
 
 2. Paper Analysis (`analyze_papers.py`):
    - Filename format: `papers/analyzed_papers_YYYY-MM-DD.md`
    - Contains the analysis results including:
-     - Summary of analysis results
-     - List of relevant papers
-     - Detailed analysis for each paper
+     - Summary of analysis results with relevance statistics
+     - Papers grouped by research topics
+     - Detailed analysis for each paper including:
+       - Relevance to each topic
+       - Reasoning for relevance
+       - Abstract and links
+     - Topic distribution table showing paper counts per topic
+     - Note about papers that may be relevant to multiple topics
 
 ## Environment Management
 

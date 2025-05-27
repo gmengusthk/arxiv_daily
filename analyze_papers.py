@@ -11,8 +11,8 @@ import re
 
 def find_latest_arxiv_output(base_dir: str = 'papers') -> str:
     """Find the latest output file from arxiv_daily.py."""
-    # Pattern to match cvpr_papers_YYYY-MM-DD_to_YYYY-MM-DD.md
-    pattern = os.path.join(base_dir, 'cvpr_papers_*_to_*.md')
+    # Pattern to match cv_papers_YYYY-MM-DD_to_YYYY-MM-DD.md
+    pattern = os.path.join(base_dir, 'cv_papers_*_to_*.md')
     files = glob.glob(pattern)
     
     if not files:
@@ -182,9 +182,9 @@ TOPICS: [comma-separated list of relevant topics from the provided list]
     }
 
 def generate_report(analysis: Dict, research_topics: List[str], output_file: str):
-    """Generate a markdown report of the analysis."""
+    """Generate a markdown report of the analysis, grouped by relevant topics."""
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write("# AI Analysis of CVPR Papers\n\n")
+        f.write("# AI Analysis of Computer Vision Papers\n\n")
         f.write(f"*Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*\n\n")
         
         f.write("## Research Topics\n\n")
@@ -197,23 +197,49 @@ def generate_report(analysis: Dict, research_topics: List[str], output_file: str
         f.write(f"- Relevant papers found: {analysis['relevance_count']}\n")
         f.write(f"- Relevance rate: {(analysis['relevance_count']/analysis['total_papers']*100):.1f}%\n\n")
         
-        f.write("## Relevant Papers\n\n")
+        # Group papers by topics
+        topic_papers = {}
         for paper in analysis['relevant_papers']:
-            f.write(f"### {paper['title']}\n\n")
-            f.write(f"**Date:** {paper['date']}\n\n")
-            f.write(f"**Authors:** {paper['authors']}\n\n")
-            f.write("**Relevant Topics:**\n")
             for topic in paper['relevance']['topics']:
-                f.write(f"- {topic}\n")
-            f.write("\n")
-            f.write("**Reason for Relevance:**\n")
-            f.write(f"{paper['relevance']['reason']}\n\n")
-            f.write("**Abstract:**\n")
-            f.write(f"{paper['abstract']}\n\n")
-            f.write("**Links:**\n")
-            f.write(f"- [arXiv Page]({paper['arxiv_url']})\n")
-            f.write(f"- [PDF]({paper['pdf_url']})\n\n")
-            f.write("---\n\n")
+                if topic not in topic_papers:
+                    topic_papers[topic] = []
+                topic_papers[topic].append(paper)
+        
+        # Write papers grouped by topics
+        f.write("## Papers by Topic\n\n")
+        for topic in research_topics:
+            if topic in topic_papers:
+                f.write(f"### {topic}\n\n")
+                f.write(f"*Found {len(topic_papers[topic])} relevant papers*\n\n")
+                
+                for paper in topic_papers[topic]:
+                    f.write(f"#### {paper['title']}\n\n")
+                    f.write(f"**Date:** {paper['date']}\n\n")
+                    f.write(f"**Authors:** {paper['authors']}\n\n")
+                    f.write("**Relevant Topics:**\n")
+                    for paper_topic in paper['relevance']['topics']:
+                        f.write(f"- {paper_topic}\n")
+                    f.write("\n")
+                    f.write("**Reason for Relevance:**\n")
+                    f.write(f"{paper['relevance']['reason']}\n\n")
+                    f.write("**Abstract:**\n")
+                    f.write(f"{paper['abstract']}\n\n")
+                    f.write("**Links:**\n")
+                    f.write(f"- [arXiv Page]({paper['arxiv_url']})\n")
+                    f.write(f"- [PDF]({paper['pdf_url']})\n\n")
+                    f.write("---\n\n")
+        
+        # Add a section for papers that might have been missed
+        f.write("## Topic Distribution\n\n")
+        f.write("| Topic | Number of Papers |\n")
+        f.write("|-------|-----------------|\n")
+        for topic in research_topics:
+            count = len(topic_papers.get(topic, []))
+            f.write(f"| {topic} | {count} |\n")
+        f.write("\n")
+        
+        # Add a note about papers that might be relevant to multiple topics
+        f.write("> Note: Papers may appear under multiple topics if they are relevant to more than one research area.\n\n")
 
 def get_output_filename(base_dir: str = 'papers') -> str:
     """Generate output filename with current date."""

@@ -11,7 +11,7 @@ def get_output_filename(start_date, end_date, base_dir='papers'):
     end_str = end_date.strftime('%Y-%m-%d')
     return os.path.join(base_dir, f'cv_papers_{start_str}_to_{end_str}.md')
 
-def get_cv_papers(past_days=3):
+def get_cv_papers(past_days=3, max_results=1000):
     # Create a directory to store the papers if it doesn't exist
     if not os.path.exists('papers'):
         os.makedirs('papers')
@@ -26,7 +26,7 @@ def get_cv_papers(past_days=3):
     # Search for papers in the Computer Vision category
     search = arxiv.Search(
         query="cat:cs.CV",
-        max_results=1000,
+        max_results=max_results,
         sort_by=arxiv.SortCriterion.SubmittedDate,
         sort_order=arxiv.SortOrder.Descending
     )
@@ -36,6 +36,7 @@ def get_cv_papers(past_days=3):
         # Write header
         f.write(f"# Computer Vision Papers from arXiv\n\n")
         f.write(f"*Last {past_days} Days ({past_date} to {today})*\n\n")
+        f.write(f"*Maximum results: {max_results}*\n\n")
         f.write("---\n\n")
 
         # Store papers in a list to sort them
@@ -88,9 +89,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Fetch Computer Vision papers from arXiv for the past N days')
     parser.add_argument('--days', type=int, default=3,
                       help='Number of past days to fetch papers for (default: 3)')
+    parser.add_argument('--max-results', type=int, default=1000,
+                      help='Maximum number of papers to fetch (default: 1000)')
     
     args = parser.parse_args()
     
     print(f"Fetching Computer Vision papers from arXiv from the past {args.days} days...")
-    output_file = get_cv_papers(args.days)
+    print(f"Maximum results: {args.max_results}")
+    output_file = get_cv_papers(args.days, args.max_results)
     print(f"Done! Results saved to '{output_file}'") 
