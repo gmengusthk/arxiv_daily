@@ -1,0 +1,5 @@
+arxiv==1.4.8
+python-dateutil==2.8.2
+openai==1.55.3
+requests==2.31.0
+python-dotenv==1.0.1 
