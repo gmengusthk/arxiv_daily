@@ -63,7 +63,7 @@ def load_papers(md_file: str) -> List[Dict]:
             current_paper = {'number': line.split('#')[1].strip()}
         elif line.startswith('### '):
             current_paper['title'] = line[4:].strip()
-        elif line.startswith('**Date:**'):
+        elif line.startswith('**Date (UTC):**'):
             current_paper['date'] = line[9:].strip()
         elif line.startswith('**Authors:**'):
             current_paper['authors'] = line[12:].strip()
