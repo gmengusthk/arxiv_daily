@@ -64,7 +64,7 @@ def load_papers(md_file: str) -> List[Dict]:
         elif line.startswith('### '):
             current_paper['title'] = line[4:].strip()
         elif line.startswith('**Date (UTC):**'):
-            current_paper['date'] = line[9:].strip()
+            current_paper['date'] = line[15:].strip()
         elif line.startswith('**Authors:**'):
             current_paper['authors'] = line[12:].strip()
         elif line.startswith('**Abstract:**'):
@@ -89,7 +89,8 @@ def parse_ai_response(response_text: str) -> Dict:
     result = {
         'relevant': False,
         'reason': '',
-        'topics': []
+        'topics': [],
+        'main_contribution': ''
     }
     
     for line in lines:
@@ -102,6 +103,8 @@ def parse_ai_response(response_text: str) -> Dict:
             topics = line[7:].strip()
             if topics:
                 result['topics'] = [t.strip() for t in topics.split(',')]
+        elif line.startswith('MAIN_CONTRIBUTION:'):
+            result['main_contribution'] = line[18:].strip()
     
     return result
 
@@ -125,11 +128,12 @@ And this paper:
 Title: {paper['title']}
 Abstract: {paper['abstract']}
 
-Analyze if this paper is relevant to any of the research topics. Provide your response in the following format:
+Analyze if this paper is relevant to any of the research topics and extract its main contribution. Provide your response in the following format:
 
 RELEVANT: [yes/no]
 REASON: [brief explanation of why it's relevant or not]
 TOPICS: [comma-separated list of relevant topics from the provided list]
+MAIN_CONTRIBUTION: [a concise summary of the paper's main contribution based on the abstract]
 """
         
         try:
@@ -140,7 +144,7 @@ TOPICS: [comma-separated list of relevant topics from the provided list]
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a research paper analyzer. Provide responses in a structured format with RELEVANT, REASON, and TOPICS sections."
+                        "content": "You are a research paper analyzer. Provide responses in a structured format with RELEVANT, REASON, TOPICS, and MAIN_CONTRIBUTION sections. For MAIN_CONTRIBUTION, focus on extracting the key technical contribution or innovation from the abstract."
                     },    
                     {
                         "role": "user",
@@ -232,6 +236,8 @@ def generate_report(analysis: Dict, research_topics: List[str], output_file: str
                     f.write(f"#### {paper['title']}\n\n")
                     f.write(f"**Date:** {paper['date']}\n\n")
                     f.write(f"**Authors:** {paper['authors']}\n\n")
+                    f.write("**Main Contribution:**\n")
+                    f.write(f"{paper['relevance']['main_contribution']}\n\n")
                     f.write("**Relevant Topics:**\n")
                     for paper_topic in paper['relevance']['topics']:
                         f.write(f"- {paper_topic}\n")
@@ -245,17 +251,18 @@ def generate_report(analysis: Dict, research_topics: List[str], output_file: str
                     f.write(f"- [PDF]({paper['pdf_url']})\n\n")
                     f.write("---\n\n")
 
-def get_output_filename(base_dir: str = 'papers') -> str:
-    """Generate output filename with current date."""
-    today = datetime.now().strftime('%Y-%m-%d')
-    return os.path.join(base_dir, f'analyzed_papers_{today}.md')
+def get_output_filename(input_file: str, base_dir: str = 'papers') -> str:
+    """Generate output filename using the same date range as the input file."""
+    # Get the date range part from the input filename
+    date_range = input_file.split('cv_papers_')[1]
+    return os.path.join(base_dir, f'analyzed_papers_{date_range}')
 
 def main():
     parser = argparse.ArgumentParser(description='Analyze CVPR papers using AI')
     parser.add_argument('--input', type=str, default=None,
                       help='Input markdown file with papers (default: latest arxiv daily output)')
     parser.add_argument('--output', type=str, default=None,
-                      help='Output markdown file for analysis (default: papers/analyzed_papers_YYYY-MM-DD.md)')
+                      help='Output markdown file for analysis (default: papers/analyzed_papers_YYYY-MM-DD_to_YYYY-MM-DD.md)')
     parser.add_argument('--topics', type=str, default=None,
                       help='Comma-separated list of research topics (default: from environment variable)')
     
@@ -273,7 +280,7 @@ def main():
     
     # Set default output filename if not provided
     if args.output is None:
-        args.output = get_output_filename()
+        args.output = get_output_filename(args.input)
     
     # Load configuration
     try:

@@ -4,8 +4,9 @@ This project automatically fetches and analyzes Computer Vision papers from arXi
 
 ## Features
 
-- Automatically fetches Computer Vision papers from arXiv(modify the query="cat:cs.CV" in arxiv.Search for other categories)
+- Automatically fetches Computer Vision papers from arXiv (modify the query="cat:cs.CV" in arxiv.Search for other categories)
 - Uses AI to analyze papers and identify relevant ones based on your research topics
+- Extracts main technical contributions from paper abstracts
 - Groups papers by research topics for better organization
 - Provides detailed analysis of each paper's relevance to your research interests
 - Generates a comprehensive markdown report with topic distribution
@@ -57,7 +58,7 @@ pip install -r requirements.txt
 
 1. First, fetch the papers:
 ```bash
-# Fetch papers from the last 3 days with default max results (1000)
+# Fetch papers from the last 3 days with default max results (500)
 python arxiv_daily.py --days 3
 
 # Fetch papers with custom max results limit
@@ -73,7 +74,7 @@ python analyze_papers.py
 # Or specify topics directly
 python analyze_papers.py --topics "computer vision,deep learning,object detection"
 ```
-This will automatically use the latest fetched papers and create a file named `papers/analyzed_papers_YYYY-MM-DD.md` containing the analysis results.
+This will automatically use the latest fetched papers and create a file named `papers/analyzed_papers_YYYY-MM-DD_to_YYYY-MM-DD.md` containing the analysis results.
 
 ### Command Line Arguments
 
@@ -83,7 +84,7 @@ For `arxiv_daily.py`:
 
 For `analyze_papers.py`:
 - `--input`: Input markdown file with papers (default: latest arxiv daily output)
-- `--output`: Output markdown file for analysis (default: papers/analyzed_papers_YYYY-MM-DD.md)
+- `--output`: Output markdown file for analysis (default: papers/analyzed_papers_YYYY-MM-DD_to_YYYY-MM-DD.md)
 - `--topics`: Comma-separated list of research topics (default: from environment variable)
 
 ## Output
@@ -97,11 +98,12 @@ The scripts generate two types of markdown files:
    - Shows the maximum number of results considered in the search
 
 2. Paper Analysis (`analyze_papers.py`):
-   - Filename format: `papers/analyzed_papers_YYYY-MM-DD.md`
+   - Filename format: `papers/analyzed_papers_YYYY-MM-DD_to_YYYY-MM-DD.md`
    - Contains the analysis results including:
      - Summary of analysis results with relevance statistics
      - Papers grouped by research topics
      - Detailed analysis for each paper including:
+       - Main technical contribution extracted from the abstract
        - Relevance to each topic
        - Reasoning for relevance
        - Abstract and links
@@ -124,19 +126,21 @@ conda activate arxiv-daily
 
 The project uses environment variables for configuration. You can set them in two ways:
 
-1. Using the `.env` file (recommended):
-   ```bash
-   cp env.template .env
-   # Edit .env with your configuration
-   ```
+1. Using a `.env` file (recommended):
+   - Copy `env.template` to `.env`
+   - Edit `.env` with your configuration
 
-2. Setting them directly in your shell, we are using OpenAI API:
+2. Setting environment variables directly:
    ```bash
    export AI_API_KEY=your_api_key_here
    export AI_MODEL=your_ai_model
    export AI_BASE_URL=your_ai_url
    export RESEARCH_TOPICS="computer vision,deep learning,object detection"
    ```
+
+## Contributing
+
+Feel free to submit issues and enhancement requests!
 
 ## License
 

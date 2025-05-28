@@ -101,7 +101,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Fetch Computer Vision papers from arXiv for the past N days from the most recent submission')
     parser.add_argument('--days', type=int, default=3,
                       help='Number of past days to fetch papers for (default: 3)')
-    parser.add_argument('--max-results', type=int, default=1000,
+    parser.add_argument('--max-results', type=int, default=500,
                       help='Maximum number of papers to fetch (default: 1000)')
     
     args = parser.parse_args()
