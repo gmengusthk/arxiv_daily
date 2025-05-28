@@ -187,8 +187,18 @@ MAIN_CONTRIBUTION: [a concise summary of the paper's main contribution based on 
 
 def generate_report(analysis: Dict, research_topics: List[str], output_file: str):
     """Generate a markdown report of the analysis, grouped by relevant topics."""
+    # Extract date range from output filename
+    match = re.search(r'analyzed_papers_(\d{4}-\d{2}-\d{2})_to_(\d{4}-\d{2}-\d{2})\.md$', output_file)
+    if match:
+        start_date = match.group(1)
+        end_date = match.group(2)
+        date_range = f"{start_date} to {end_date}"
+    else:
+        date_range = "unknown date range"
+
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write("# AI Analysis of Computer Vision Papers\n\n")
+        f.write(f"*Date Range: {date_range}*\n")
         f.write(f"*Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*\n\n")
         
         f.write("## Research Topics\n\n")
